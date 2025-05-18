@@ -420,7 +420,7 @@ form button
 }
 .auth-form input
 {
-    width: 100%;
+    width: 95%;
     padding: 10px;
     margin-bottom: 15px;
     border: 1px solid #ccc;
@@ -529,7 +529,13 @@ form button
     }
     .auth-form
     {
+        max-width: 90%;
         padding: 20px;
+    }
+    .auth-form input
+    {
+        width: 90%;
+        padding: 8px;
     }
     .auth-form h2
     {
@@ -590,7 +596,13 @@ form button
     }
     .auth-form
     {
+        max-width: 80%;
         padding: 15px;
+    }
+    .auth-form input
+    {
+        width: 80%;
+        padding: 6px;
     }
     .auth-form h2
     {
