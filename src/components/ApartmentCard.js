@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { collection, addDoc, getDocs, query, orderBy, doc, getDoc } from 'firebase/firestore';
 import { auth, db } from '../firebase';
+import { Timestamp } from 'firebase/firestore';
 
 function ApartmentCard({ apt, index, onBook, onCancel, isBooked }) {
   const [currentPhoto, setCurrentPhoto] = useState(0);
@@ -64,7 +65,7 @@ function ApartmentCard({ apt, index, onBook, onCancel, isBooked }) {
       const docRef = await addDoc(reviewRef, {
         userId: user.uid,
         text: reviewText,
-        timestamp: new Date(),
+        timestamp: Timestamp.fromDate(new Date()), // Store as Firestore Timestamp
         firstName: userData.firstName || 'Unknown',
         lastName: userData.lastName || '',
       });
@@ -86,6 +87,31 @@ function ApartmentCard({ apt, index, onBook, onCancel, isBooked }) {
       console.error('Error adding review:', err);
       alert('Failed to add review: ' + err.message);
     }
+  };
+
+  const getFormattedDate = (timestamp) => {
+    if (!timestamp) return 'No date';
+    let date;
+    if (timestamp instanceof Timestamp) {
+      date = timestamp.toDate();
+    } else if (timestamp instanceof Date) {
+      date = timestamp;
+    } else if (typeof timestamp === 'string') {
+      date = new Date(timestamp);
+    } else if (typeof timestamp === 'object' && 'seconds' in timestamp) {
+      date = new Date(timestamp.seconds * 1000);
+    } else {
+      console.warn('Invalid timestamp format:', timestamp);
+      return 'Invalid date';
+    }
+    return date.toLocaleString('en-US', {
+      year: 'numeric',
+      month: 'numeric',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false,
+    });
   };
 
   return (
@@ -135,22 +161,14 @@ function ApartmentCard({ apt, index, onBook, onCancel, isBooked }) {
                 <li key={i}>
                   <p>
                     <strong>{review.firstName} {review.lastName}</strong> (
-                      {new Date(review.timestamp.toDate()).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'numeric',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                      })}
-                    ):
+                    {getFormattedDate(review.timestamp)}):
                   </p>
                   <p>{review.text}</p>
                 </li>
               ))}
             </ul>
           ) : (
-            <p>No reviews yet😢</p>
+            <p>No reviews yet 😢</p>
           )}
         </details>
         {isBooked ? (
